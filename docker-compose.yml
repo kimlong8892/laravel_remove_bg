@@ -1,0 +1,67 @@
+version: '4.0'
+services:
+  web_app_server:
+    container_name: 'web_app_server'
+    user: root
+    build:
+      context: ./source/
+      dockerfile: ../Dockerfile
+    environment:
+      PHP_IDE_CONFIG: "serverName=web_app_server"
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    image: wp-app
+    restart: unless-stopped
+    volumes:
+      - ./source:/var/www/html
+      - ./supervisor/supervisord.conf:/etc/supervisor/conf.d/supervisord.conf
+      - ./lib/php-fpm.conf:/usr/local/etc/php-fpm.d/zz-docker.conf
+    working_dir: /var/www/html
+    networks:
+      - app-wp-network
+  app_nginx_server:
+    container_name: 'app_nginx_server'
+    image: nginx:stable-alpine
+    restart: unless-stopped
+    ports:
+      - '${WEB_PORT}:80'
+    volumes:
+      - ./source:/var/www/html
+      - ./nginx/conf.d:/etc/nginx/conf.d/
+      - ./nginx/logs:/var/log/nginx/
+    networks:
+      - app-wp-network
+  db_server:
+    container_name: 'web_app_db_server'
+    image: mariadb:10.5
+    restart: always
+    environment:
+      MARIADB_ROOT_PASSWORD: Admin123
+      MARIADB_DATABASE: laravel_db
+      MARIADB_USER: admin
+      MARIADB_PASSWORD: Admin123
+    ports:
+      - "${MYSQL_PORT}:3306"
+    networks:
+      - app-wp-network
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    restart: always
+    container_name: "rabbitmq-container"
+    ports:
+      - "5672:5672"
+      - "15672:15672"  # Port for RabbitMQ management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: "admin"
+      RABBITMQ_DEFAULT_PASS: "@Admin123"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - app-wp-network
+#Docker Networks
+networks:
+  app-wp-network:
+    driver: bridge
+volumes:
+  rabbitmq_data:
+    driver: local
