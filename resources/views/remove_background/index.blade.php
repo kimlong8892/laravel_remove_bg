@@ -65,7 +65,7 @@
             }
         });
 
-        $('#before, #after, #after-download').hide();
+        $('#before, #after, #after-download, #btn-remove-background').hide();
 
 
         $('#file').change(function () {
@@ -73,15 +73,23 @@
 
             if (fileInputPreview && fileInputPreview.length > 0) {
                 const file = fileInputPreview[0];
+
+                if (!file.type.startsWith('image/')) {
+                    alert('Vui lòng chọn một file hình ảnh hợp lệ (JPEG, PNG, ...).');
+                    $(this).val('');
+                    return;
+                }
+
                 const reader = new FileReader();
                 reader.onload = function (e) {
                     $('#before').attr('src', e.target.result);
                 };
                 reader.readAsDataURL(file);
 
-                $('#before').show();
+                $('#before, #btn-remove-background').show();
             }
         });
+
 
         $('#btn-remove-background').click(function () {
             const fileInput = $('#file')[0];

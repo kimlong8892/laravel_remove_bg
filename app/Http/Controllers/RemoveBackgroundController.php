@@ -11,6 +11,10 @@ class RemoveBackgroundController extends Controller {
     }
 
     public function RemoveBackground(Request $request): \Illuminate\Http\JsonResponse {
+        $request->validate([
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg',
+        ]);
+
         if ($request->hasFile('image')) {
             $image = $request->file('image');
             $fileName = 'image_origin.' . $image->getClientOriginalExtension();
