@@ -16,3 +16,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/remove-background', [\App\Http\Controllers\RemoveBackgroundController::class, 'Index']);
+
+Route::post('/remove-background', [\App\Http\Controllers\RemoveBackgroundController::class, 'RemoveBackground'])->name('remove_background.post');
